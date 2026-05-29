@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>أثَــر | Athar — المنصة الإسلامية الرقمية الفاخرة</title>
+    
+    <!-- Google Fonts: Cairo & Tajawal -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS (Not used - using pure vanilla CSS in style.css for maximum flexibility and custom HSL gradients) -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Lucide Icons for premium modern look -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="time-dawn"> <!-- Initial state: dawn theme -->
+    
+    <!-- Background blurred ambient lighting -->
+    <div class="ambient-glow"></div>
+
+    <!-- Desktop Wrapper to display a premium phone mockup on wider screens -->
+    <div class="app-container">
+        
+        <!-- The Phone Mockup Frame -->
+        <div class="phone-frame">
+            <!-- Notch/Speaker -->
+            <div class="phone-notch"></div>
+            
+            <!-- App Screen Inner Container -->
+            <div class="screen-container">
+                
+                <!-- Status Bar -->
+                <div class="status-bar">
+                    <span class="status-time" id="status-clock">04:30 ص</span>
+                    <div class="status-icons">
+                        <i data-lucide="wifi"></i>
+                        <i data-lucide="battery"></i>
+                    </div>
+                </div>
+                
+                <!-- Time Machine Controller (Interactive slider inside settings/hidden top bar to simulate time-of-day changes) -->
+                <div class="time-machine-bar" id="time-machine-bar">
+                    <span>محاكي الوقت:</span>
+                    <select id="time-simulator" class="time-select">
+                        <option value="dawn">الفجر (الشروق)</option>
+                        <option value="noon">الظهر (النهار)</option>
+                        <option value="dusk">المغرب (الغروب)</option>
+                        <option value="night">العشاء (الليل الفاخر)</option>
+                    </select>
+                    <button class="close-tm-btn" id="close-tm-btn"><i data-lucide="x"></i></button>
+                </div>
+                
+                <!-- App Header -->
+                <header class="app-header">
+                    <div class="header-content">
+                        <div class="app-brand">
+                            <span class="brand-title">أثَــر</span>
+                            <span class="brand-subtitle" id="current-hijri-date">12 ذو الحجة 1447 هـ</span>
+                        </div>
+                        <div class="header-actions">
+                            <button class="header-btn" id="time-machine-trigger" title="محاكاة أوقات اليوم">
+                                <i data-lucide="hourglass"></i>
+                            </button>
+                            <button class="header-btn profile-btn" id="profile-trigger">
+                                <i data-lucide="user"></i>
+                            </button>
+                        </div>
+                    </div>
+                </header>
+                
+                <!-- Main Core Scrollable Content Area -->
+                <main class="main-content" id="main-scrollable">
+                    
+                    <!-- TAB 1: DASHBOARD (الرئيسية) -->
+                    <section class="tab-panel active" id="panel-dashboard">
+                        <!-- Prayer Countdown Hero Banner -->
+                        <div class="hero-banner">
+                            <div class="hero-bg-overlay"></div>
+                            <div class="hero-content">
+                                <span class="prayer-label">الصلاة القادمة: <strong id="next-prayer-name">الفجر</strong></span>
+                                <h1 class="prayer-time-countdown" id="prayer-countdown">01:12:45</h1>
+                                <span class="prayer-local-time">توقيت الأذان: <span id="next-prayer-time">04:31 ص</span></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Shia Devotionals Dashboard Guide Banner -->
+                        <div class="shia-guide-banner hidden" id="shia-dashboard-guide" onclick="switchTab('tasbih')">
+                            <div class="shia-guide-content">
+                                <i data-lucide="book-open"></i>
+                                <div class="shia-guide-text">
+                                    <span class="title">دليل الأدعية والزيارات الجعفرية</span>
+                                    <span class="desc">تم تفعيل زيارة عاشوراء، دعاء كميل، حديث الكساء، والزيارات. انقر هنا.</span>
+                                </div>
+                            </div>
+                            <i data-lucide="chevron-left" class="arrow"></i>
+                        </div>
+                        
+                        <!-- Quick Navigation / Stats Bar -->
+                        <div class="grid-stats">
+                            <div class="stat-card" onclick="switchTab('tasbih')">
+                                <i data-lucide="fingerprint" class="stat-icon tasbih-icon"></i>
+                                <span class="stat-title">تسبحة اليوم</span>
+                                <span class="stat-value" id="dash-tasbih-count">0</span>
+                            </div>
+                            <div class="stat-card" onclick="switchTab('tracker')">
+                                <i data-lucide="activity" class="stat-icon tracker-icon"></i>
+                                <span class="stat-title">نسبة الالتزام</span>
+                                <span class="stat-value" id="dash-tracker-percent">0%</span>
+                            </div>
+                            <div class="stat-card" onclick="openQiblaModal()">
+                                <i data-lucide="compass" class="stat-icon qibla-icon"></i>
+                                <span class="stat-title">اتجاه القبلة</span>
+                                <span class="stat-value">3D</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Time-Aware Adaptive Card -->
+                        <div class="adaptive-card" id="adaptive-dhikr-card">
+                            <div class="adaptive-card-header">
+                                <span class="badge" id="adaptive-dhikr-badge">أذكار الصباح</span>
+                                <span class="subtitle">وردك المناسب للوقت الحالي</span>
+                            </div>
+                            <div class="adaptive-card-body">
+                                <p class="dhikr-text" id="adaptive-dhikr-text">"أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ..."</p>
+                                <div class="dhikr-progress-wrapper">
+                                    <span class="dhikr-counter" id="adaptive-dhikr-counter">0 / 3</span>
+                                    <button class="btn btn-primary btn-sm" id="adaptive-dhikr-tap-btn">تكرار الذكر</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quran Quote Card -->
+                        <div class="quran-quote-card">
+                            <i class="quote-icon" data-lucide="quote"></i>
+                            <p class="quote-text" id="daily-verse-text">"أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ"</p>
+                            <span class="quote-reference" id="daily-verse-ref">سورة الرعد - الآية 28</span>
+                        </div>
+
+                        <!-- Prayer Times List Card -->
+                        <div class="prayer-times-list">
+                            <h3 class="section-title"><i data-lucide="clock"></i> مواقيت الصلاة لليوم</h3>
+                            <div class="prayer-rows">
+                                <div class="prayer-row" id="prayer-fajr">
+                                    <span class="name">الفجر</span>
+                                    <span class="time">04:31 ص</span>
+                                </div>
+                                <div class="prayer-row" id="prayer-shuruq">
+                                    <span class="name">الشروق</span>
+                                    <span class="time">06:05 ص</span>
+                                </div>
+                                <div class="prayer-row" id="prayer-dhuhr">
+                                    <span class="name">الظهر</span>
+                                    <span class="time">12:22 م</span>
+                                </div>
+                                <div class="prayer-row" id="prayer-asr">
+                                    <span class="name">العصر</span>
+                                    <span class="time">03:52 م</span>
+                                </div>
+                                <div class="prayer-row" id="prayer-maghrib">
+                                    <span class="name">المغرب</span>
+                                    <span class="time">06:40 م</span>
+                                </div>
+                                <div class="prayer-row" id="prayer-isha">
+                                    <span class="name">العشاء</span>
+                                    <span class="time">08:10 م</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- TAB 2: QURAN (المصحف) -->
+                    <section class="tab-panel" id="panel-quran">
+                        <!-- Quran Navigation / Surah Search -->
+                        <div class="quran-search-bar">
+                            <div class="search-input-wrapper">
+                                <i data-lucide="search" class="search-icon"></i>
+                                <input type="text" id="quran-search-input" placeholder="ابحث عن سورة أو آية...">
+                            </div>
+                        </div>
+                        
+                        <!-- Surah Index Page -->
+                        <div class="quran-index" id="quran-index-view">
+                            <h3 class="section-title">فهرس السور الشريفة</h3>
+                            <div class="surah-list" id="surah-list-container">
+                                <!-- Dynamic rendering of Surahs -->
+                            </div>
+                        </div>
+                        
+                        <!-- Reading View Page (Hidden initially) -->
+                        <div class="quran-reading-canvas hidden" id="quran-reading-view">
+                            <div class="reading-header">
+                                <button class="btn-icon" id="back-to-index-btn"><i data-lucide="chevron-right"></i> الفهرس</button>
+                                <span class="surah-name-title" id="canvas-surah-title">سورة الفاتحة</span>
+                                <div class="canvas-controls">
+                                    <button class="btn-icon" id="font-decrease-btn" title="تصغير الخط">أ-</button>
+                                    <button class="btn-icon" id="font-increase-btn" title="تكبير الخط">أ+</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Bismillah and Verses -->
+                            <div class="reading-body" id="verses-canvas-container">
+                                <div class="bismillah" id="reading-bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+                                <div class="verses-grid" id="verses-grid-container">
+                                    <!-- Dynamic verses rendering -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- TAB 3: TASBIH (السبحة) -->
+                    <section class="tab-panel" id="panel-tasbih">
+                        <div class="tasbih-header">
+                            <div class="tasbih-selector">
+                                <select id="tasbih-dhikr-select" class="dhikr-select">
+                                    <option value="سبحان الله">سبحان الله</option>
+                                    <option value="الحمد لله">الحمد لله</option>
+                                    <option value="لا إله إلا الله">لا إله إلا الله</option>
+                                    <option value="الله أكبر">الله أكبر</option>
+                                    <option value="أستغفر الله العظيم">أستغفر الله العظيم</option>
+                                    <option value="custom">ذكر مخصص...</option>
+                                </select>
+                            </div>
+                            <div class="tasbih-target">
+                                <span>المستهدف:</span>
+                                <span class="target-val" id="tasbih-target-val">33</span>
+                            </div>
+                        </div>
+                        
+                        <!-- The Sacred Digital Tasbih clicker -->
+                        <div class="tasbih-click-area" id="tasbih-click-area">
+                            <div class="tasbih-ring" id="tasbih-ring">
+                                <div class="tasbih-ring-inner">
+                                    <span class="tasbih-current-count" id="tasbih-current-count">0</span>
+                                    <span class="tasbih-dhikr-label" id="tasbih-dhikr-label">سبحان الله</span>
+                                </div>
+                            </div>
+                            <div class="tasbih-hint">اضغط في أي مكان على الدائرة للتسبيح</div>
+                        </div>
+                        
+                        <div class="tasbih-actions">
+                            <button class="btn btn-secondary btn-icon" id="tasbih-reset-btn" title="إعادة تعيين العداد">
+                                <i data-lucide="rotate-ccw"></i> إعادة تعيين
+                            </button>
+                            <button class="btn btn-secondary btn-icon" id="tasbih-edit-target" title="تغيير المستهدف">
+                                <i data-lucide="target"></i> المستهدف
+                            </button>
+                        </div>
+
+                        <!-- Shia Duas & Ziyarat Section (ONLY visible when Ja'fari school is active) -->
+                        <div class="shia-devotionals-section hidden" id="shia-devotionals-section">
+                            
+                            <h3 class="section-title" style="margin-top: 24px;"><i data-lucide="book-open-check"></i> الأدعية والزيارات المباركة</h3>
+                            
+                            <!-- Sub Tabs -->
+                            <div class="tafsir-options-tabs" style="margin: 12px 0 16px;">
+                                <button class="tab-btn active" id="btn-shia-duas" onclick="switchShiaSubCategory('duas')">الأدعية المباركة</button>
+                                <button class="tab-btn" id="btn-shia-ziyarat" onclick="switchShiaSubCategory('ziyarat')">الزيارات الشريفة</button>
+                            </div>
+                            
+                            <!-- Supplications List -->
+                            <div class="shia-devotional-cards" id="shia-duas-list">
+                                <div class="shia-card" onclick="openShiaDuasModal('kumayl')">
+                                    <span class="title">دعاء كميل بن زياد</span>
+                                    <span class="desc">يُقرأ في ليلة الجمعة لطلب المغفرة وكفاية الأعداء</span>
+                                </div>
+                                <div class="shia-card" onclick="openShiaDuasModal('ahd')">
+                                    <span class="title">دعاء العهد الشريف</span>
+                                    <span class="desc">يستحب قراءته أربعين صباحاً لتجديد نصرة إمام الزمان (عج)</span>
+                                </div>
+                                <div class="shia-card" onclick="openShiaDuasModal('tawassul')">
+                                    <span class="title">دعاء التوسل بالأئمة</span>
+                                    <span class="desc">وسيلة لقضاء الحوائج والتقرب إلى الله تعالى</span>
+                                </div>
+                                <div class="shia-card" onclick="openShiaDuasModal('nudbah')">
+                                    <span class="title">دعاء الندبة</span>
+                                    <span class="desc">يُندب به إمام العصر والزمان في الأعياد والجمع</span>
+                                </div>
+                                <div class="shia-card" onclick="openShiaDuasModal('kisa')">
+                                    <span class="title">حديث الكساء الشريف</span>
+                                    <span class="desc">حديث مأثور في بيان فضل الخمسة أصحاب الكساء (ع)</span>
+                                </div>
+                                <div class="shia-card" onclick="openShiaDuasModal('jawshan')">
+                                    <span class="title">دعاء الجوشن الكبير</span>
+                                    <span class="desc">دعاء مروي عن النبي ﷺ يحتوي على مئة فصل من أسماء الله</span>
+                                </div>
+                                <div class="shia-card" onclick="openShiaDuasModal('hazin')">
+                                    <span class="title">دعاء الحزين</span>
+                                    <span class="desc">يُقرأ بخشوع بعد صلاة الليل لمناجاة الخالق وطلب التوبة</span>
+                                </div>
+                                <div class="shia-card" onclick="openShiaDuasModal('ilhah')">
+                                    <span class="title">دعاء الإلحاح</span>
+                                    <span class="desc">دعاء عظيم مأثور عن الأئمة لطلب المغفرة والإلحاح في المسألة</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Visitations List -->
+                            <div class="shia-devotional-cards hidden" id="shia-ziyarat-list">
+                                <div class="shia-card" onclick="openShiaDuasModal('ashura')">
+                                    <span class="title">زيارة عاشوراء</span>
+                                    <span class="desc">زيارة الإمام الحسين (ع) مع العداد التفاعلي (100 مرة)</span>
+                                </div>
+                                <div class="shia-card" onclick="openShiaDuasModal('warith')">
+                                    <span class="title">زيارة وارث الشريفة</span>
+                                    <span class="desc">زيارة حسينية بليغة السند في وراثة الحسين (ع) للأنبياء</span>
+                                </div>
+                                <div class="shia-card" onclick="openShiaDuasModal('ameenallah')">
+                                    <span class="title">زيارة أمين الله</span>
+                                    <span class="desc">يزور بها أمير المؤمنين (ع) والباقي من أئمة الهدى</span>
+                                </div>
+                                <div class="shia-card" onclick="openShiaDuasModal('yaseen')">
+                                    <span class="title">زيارة آل ياسين</span>
+                                    <span class="desc">زيارة رفيعة وعميقة المضامين لصاحب الأمر (عج)</span>
+                                </div>
+                                <div class="shia-card" onclick="openShiaDuasModal('jamiah')">
+                                    <span class="title">زيارة الجامعة الكبيرة</span>
+                                    <span class="desc">أكمل النصوص الزيارية في شرح مقامات ومناقب أئمة الهدى</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- TAB 4: TRACKER (الأثر) -->
+                    <section class="tab-panel" id="panel-tracker">
+                        <div class="tracker-header">
+                            <div class="tracker-progress-donut">
+                                <svg class="donut-svg" viewBox="0 0 100 100">
+                                    <circle class="donut-track" cx="50" cy="50" r="40"></circle>
+                                    <circle class="donut-fill" id="tracker-donut-fill" cx="50" cy="50" r="40" stroke-dasharray="251.2" stroke-dashoffset="251.2"></circle>
+                                </svg>
+                                <div class="donut-center">
+                                    <span class="percent" id="tracker-today-percent">0%</span>
+                                    <span class="subtitle">عبادات اليوم</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Daily checklist -->
+                        <div class="tracker-section">
+                            <h3 class="section-title"><i data-lucide="check-square"></i> قائمة عبادات اليوم</h3>
+                            <div class="checklist" id="daily-checklist-container">
+                                <div class="check-item">
+                                    <label class="check-label">
+                                        <input type="checkbox" class="tracker-checkbox" data-habit="fajr">
+                                        <span class="check-box-custom"></span>
+                                        <span class="check-text">صلاة الفجر</span>
+                                    </label>
+                                </div>
+                                <div class="check-item">
+                                    <label class="check-label">
+                                        <input type="checkbox" class="tracker-checkbox" data-habit="dhuhr">
+                                        <span class="check-box-custom"></span>
+                                        <span class="check-text">صلاة الظهر</span>
+                                    </label>
+                                </div>
+                                <div class="check-item">
+                                    <label class="check-label">
+                                        <input type="checkbox" class="tracker-checkbox" data-habit="asr">
+                                        <span class="check-box-custom"></span>
+                                        <span class="check-text">صلاة العصر</span>
+                                    </label>
+                                </div>
+                                <div class="check-item">
+                                    <label class="check-label">
+                                        <input type="checkbox" class="tracker-checkbox" data-habit="maghrib">
+                                        <span class="check-box-custom"></span>
+                                        <span class="check-text">صلاة المغرب</span>
+                                    </label>
+                                </div>
+                                <div class="check-item">
+                                    <label class="check-label">
+                                        <input type="checkbox" class="tracker-checkbox" data-habit="isha">
+                                        <span class="check-box-custom"></span>
+                                        <span class="check-text">صلاة العشاء</span>
+                                    </label>
+                                </div>
+                                <div class="check-item">
+                                    <label class="check-label">
+                                        <input type="checkbox" class="tracker-checkbox" data-habit="sunnah">
+                                        <span class="check-box-custom"></span>
+                                        <span class="check-text">السنن والرواتب</span>
+                                    </label>
+                                </div>
+                                <div class="check-item">
+                                    <label class="check-label">
+                                        <input type="checkbox" class="tracker-checkbox" data-habit="quran">
+                                        <span class="check-box-custom"></span>
+                                        <span class="check-text">الورد القرآني اليومي</span>
+                                    </label>
+                                </div>
+                                <div class="check-item">
+                                    <label class="check-label">
+                                        <input type="checkbox" class="tracker-checkbox" data-habit="adhkar">
+                                        <span class="check-box-custom"></span>
+                                        <span class="check-text">أذكار الصباح والمساء</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Beautiful charts -->
+                        <div class="tracker-section">
+                            <h3 class="section-title"><i data-lucide="bar-chart-2"></i> الالتزام الأسبوعي</h3>
+                            <div class="chart-wrapper">
+                                <canvas id="tracker-weekly-chart" class="tracker-chart"></canvas>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <!-- TAB 5: SETTINGS (الضبط) -->
+                    <section class="tab-panel" id="panel-settings">
+                        <h3 class="section-title"><i data-lucide="settings"></i> إعدادات التطبيق العامة</h3>
+                        
+                        <div class="settings-list">
+                            
+                            <!-- Design and Theme Customization -->
+                            <div class="setting-group-title">الهوية والسمات</div>
+                            
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <span class="title">الوضع البصري الحالي</span>
+                                    <span class="subtitle">اختر بين الوضع المظلم الفاخر أو النهاري أو المتغير تلقائياً</span>
+                                </div>
+                                <select id="theme-select" class="setting-select">
+                                    <option value="auto">تلقائي (مع أوقات اليوم)</option>
+                                    <option value="light">الوضع النهاري الفاخر</option>
+                                    <option value="dark">الوضع الليلي الملكي</option>
+                                </select>
+                            </div>
+                            
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <span class="title">شريط محاكي الوقت السريع</span>
+                                    <span class="subtitle">إظهار أداة اختبار وتغيير أوقات اليوم بالأعلى</span>
+                                </div>
+                                <label class="switch-toggle">
+                                    <input type="checkbox" id="tm-visible-checkbox" checked>
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+
+                            <!-- Prayer Calculations settings -->
+                            <div class="setting-group-title">الموقع الفلكي ومواقيت الصلاة</div>
+                            
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <span class="title">طريقة الحساب الفلكي</span>
+                                    <span class="subtitle">المدرسة الحسابية المعتمدة لتوقيت الفجر والعشاء</span>
+                                </div>
+                                <select id="calc-method-select" class="setting-select">
+                                    <option value="umm-al-qura">تقويم أم القرى (مكة المكرمة)</option>
+                                    <option value="jafari">المذهب الجعفري (الشيعي - جامعة طهران)</option>
+                                    <option value="egypt">الهيئة المصرية العامة للمساحة</option>
+                                    <option value="mwl">رابطة العالم الإسلامي</option>
+                                    <option value="isna">الجمعية الإسلامية لأمريكا الشمالية</option>
+                                </select>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <span class="title">صوت الأذان والتنبيهات</span>
+                                    <span class="subtitle">اختر الأذان المفضل للتنبيهات</span>
+                                </div>
+                                <select id="athan-sound-select" class="setting-select">
+                                    <option value="al-haram">أذان الحرم المكي</option>
+                                    <option value="shia">الأذان الجعفري (الشيعي - أبا ذر الحلواجي)</option>
+                                    <option value="al-aqsa">أذان المسجد الأقصى</option>
+                                    <option value="madina">أذان الحرم المدني</option>
+                                    <option value="silent">صامت (تنبيه نبضي فقط)</option>
+                                </select>
+                            </div>
+
+                            <!-- Cloud sync and profile -->
+                            <div class="setting-group-title">المزامنة والنسخ الاحتياطي</div>
+                            
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <span class="title">المزامنة السحابية المجهولة (AES-256)</span>
+                                    <span class="subtitle">مزامنة الورد اليومي والقبلة بدون بيانات شخصية</span>
+                                </div>
+                                <button class="btn btn-secondary btn-sm" id="btn-sync-now">مزامنة الآن</button>
+                            </div>
+
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <span class="title">حفظ البيانات للعمل أوفلاين</span>
+                                    <span class="subtitle">حالة التخزين والذاكرة المخصصة للقرآن والسمعيات</span>
+                                </div>
+                                <span class="badge badge-success">مكتمل النشاط (100%)</span>
+                            </div>
+                        </div>
+
+                        <!-- Developer Credits -->
+                        <div class="dev-credits">
+                            <p>تطبيق أثَــر — الإصدار 1.0.0</p>
+                            <p>© 2026 جميع الحقوق محفوظة لفريق تطوير أثر</p>
+                            <a href="https://instagram.com/310ie" target="_blank" class="dev-instagram-btn">
+                                <i data-lucide="instagram"></i>
+                                <span>حساب المطور: @310ie</span>
+                            </a>
+                        </div>
+                    </section>
+                    
+                </main>
+                
+                <!-- Immersive Custom Floating Audio Player (Active when playing Quran) -->
+                <div class="audio-player-bar hidden" id="audio-player-bar">
+                    <div class="ap-progress-bar" id="ap-progress">
+                        <div class="ap-progress-fill" id="ap-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="ap-container">
+                        <div class="ap-info">
+                            <span class="ap-title" id="ap-surah-title">سورة الفاتحة</span>
+                            <span class="ap-subtitle" id="ap-reader-title">الشيخ عبد الباسط عبد الصمد</span>
+                        </div>
+                        <div class="ap-controls">
+                            <button class="ap-btn" id="ap-repeat-btn" title="تكرار الآية"><i data-lucide="repeat-1"></i></button>
+                            <button class="ap-btn ap-play-btn" id="ap-play-pause-btn"><i data-lucide="play"></i></button>
+                            <button class="ap-btn" id="ap-close-btn"><i data-lucide="x"></i></button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Smart Bottom Navigation Bar -->
+                <nav class="bottom-nav">
+                    <button class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')">
+                        <i data-lucide="layout-dashboard"></i>
+                        <span>الرئيسية</span>
+                    </button>
+                    <button class="nav-item" id="nav-quran" onclick="switchTab('quran')">
+                        <i data-lucide="book-open"></i>
+                        <span>المصحف</span>
+                    </button>
+                    <button class="nav-item" id="nav-tasbih" onclick="switchTab('tasbih')">
+                        <i data-lucide="fingerprint"></i>
+                        <span>السبحة</span>
+                    </button>
+                    <button class="nav-item" id="nav-tracker" onclick="switchTab('tracker')">
+                        <i data-lucide="activity"></i>
+                        <span>الأثر</span>
+                    </button>
+                    <button class="nav-item" id="nav-settings" onclick="switchTab('settings')">
+                        <i data-lucide="settings"></i>
+                        <span>الضبط</span>
+                    </button>
+                </nav>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 1: 3D QIBLA COMPASS DIALOG -->
+    <div class="modal-overlay hidden" id="qibla-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title"><i data-lucide="compass"></i> بوصلة القبلة التفاعلية</h3>
+                <button class="close-modal-btn" onclick="closeQiblaModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc">قم بتدوير الهاتف أو سحب المجسم لمطابقة السهم الذهبي وتحديد اتجاه القبلة الدقيق نحو الكعبة المشرفة.</p>
+                
+                <!-- The dynamic 3D-like compass wrapper -->
+                <div class="compass-canvas-wrapper">
+                    <div class="compass-rose" id="compass-rose">
+                        <!-- Compass markings -->
+                        <div class="compass-mark north">ش</div>
+                        <div class="compass-mark east">ق</div>
+                        <div class="compass-mark south">ج</div>
+                        <div class="compass-mark west">غ</div>
+                        
+                        <!-- Kaaba golden indicator in 3D -->
+                        <div class="kaaba-indicator" id="kaaba-indicator">
+                            <div class="kaaba-icon-glow"></div>
+                            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='25' y='25' width='50' height='50' fill='%23111' stroke='%23d4af37' stroke-width='3'/><rect x='25' y='35' width='50' height='10' fill='%23d4af37'/></svg>" class="kaaba-img" alt="Kaaba">
+                        </div>
+                        
+                        <!-- Needle -->
+                        <div class="compass-needle"></div>
+                    </div>
+                    
+                    <div class="qibla-status" id="qibla-status">درجة الانحراف: <strong>135° جنوب شرق</strong></div>
+                </div>
+                
+                <div class="qibla-action-buttons">
+                    <button class="btn btn-primary" onclick="simulateQiblaMatch()">معايرة تلقائية للحقول</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: TAFSIR / TRANSLATION BOTTOM SHEET -->
+    <div class="bottom-sheet hidden" id="tafsir-sheet">
+        <div class="sheet-backdrop" onclick="closeTafsirSheet()"></div>
+        <div class="sheet-container">
+            <div class="sheet-drag-handle"></div>
+            <div class="sheet-header">
+                <span class="sheet-title" id="tafsir-title">تفسير الآية</span>
+                <button class="close-sheet-btn" onclick="closeTafsirSheet()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="sheet-body">
+                <div class="verse-quote" id="tafsir-verse-quote"></div>
+                
+                <div class="tafsir-options-tabs">
+                    <button class="tab-btn active" id="btn-tafsir-saadi">تفسير السعدي</button>
+                    <button class="tab-btn" id="btn-tafsir-muyassar">التفسير الميسر</button>
+                    <button class="tab-btn" id="btn-tafsir-english">English Translation</button>
+                </div>
+                
+                <div class="tafsir-content-text" id="tafsir-content-text">
+                    جاري تحميل التفسير...
+                </div>
+                
+                <div class="tafsir-footer-player">
+                    <button class="btn btn-primary btn-block btn-icon" id="btn-play-verse-audio">
+                        <i data-lucide="play"></i> استمع للآية بصوت القارئ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: SHIA DUAS & ZIYARAT READER -->
+    <div class="modal-overlay hidden" id="shia-duas-modal">
+        <div class="modal-container sheet-container" style="max-width: 380px; max-height: 85%; border-top-left-radius: 24px; border-top-right-radius: 24px; display: flex; flex-direction: column;">
+            <div class="sheet-drag-handle" style="margin-top: 10px;"></div>
+            <div class="modal-header" style="padding: 8px 20px 16px;">
+                <h3 class="modal-title" id="shia-modal-title"><i data-lucide="book-open"></i> زيارة عاشوراء</h3>
+                <button class="close-modal-btn" onclick="closeShiaDuasModal()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; flex: 1;">
+                <div class="verse-quote" id="shia-modal-text" style="font-size: 1.1rem; line-height: 2; text-align: justify; background: var(--card); padding: 16px; border-radius: 16px; border: 1px solid var(--card-border); max-height: 280px; overflow-y: auto;">
+                    جاري تحميل التفسير...
+                </div>
+                
+                <!-- Built-in Counter Helper for Ziyarat Ashura 100 Curses/Greetings -->
+                <div class="ziyarat-counter-wrapper hidden" id="ziyarat-counter-wrapper" style="background: var(--card); border: 1px solid var(--card-border); border-radius: 16px; padding: 14px 18px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+                    <div class="z-counter-title" id="z-counter-title" style="font-weight: 700; font-size: 0.95rem; color: var(--primary);">عداد اللعن (100 مرة)</div>
+                    <div class="z-counter-controls" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <span class="z-counter-value" id="z-counter-value" style="font-weight: 700; font-size: 1.15rem; color: var(--primary);">0 / 100</span>
+                        <button class="btn btn-primary btn-sm" id="btn-z-count" onclick="incrementZiyaratCounter()">تكرار +1</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Audio Element for background playback -->
+    <audio id="global-audio-element" preload="auto"></audio>
+
+    <!-- Embedded Scripts -->
+    <script src="quran.js"></script>
+    <script src="tasbih.js"></script>
+    <script src="qibla.js"></script>
+    <script src="tracker.js"></script>
+    <script src="calendar.js"></script>
+    <script src="devotionals.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
