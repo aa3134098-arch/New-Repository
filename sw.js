@@ -4,7 +4,7 @@
 ========================================================================
 */
 
-const CACHE_NAME = 'athar-cache-v3'; // Bump version to force cache update
+const CACHE_NAME = 'athar-cache-v4'; // Bump version to force cache update
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
