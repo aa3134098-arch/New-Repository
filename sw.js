@@ -4,17 +4,20 @@
 ========================================================================
 */
 
-const CACHE_NAME = 'athar-cache-v1';
+const CACHE_NAME = 'athar-cache-v3'; // Bump version to force cache update
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './style.css',
     './app.js',
+    './devotionals.js',
     './quran.js',
     './tasbih.js',
     './qibla.js',
     './tracker.js',
-    './calendar.js'
+    './calendar.js',
+    './manifest.json',
+    './icon.png'
 ];
 
 // 1. INSTALL SERVICE WORKER (Cache Core Assets)
